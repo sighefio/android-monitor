@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Android Monitor</string>
+    <string name="connect_wifi">Connect over WiFi</string>
+    <string name="connect_usb">Connect over USB (ADB)</string>
+    <string name="host_address">Mac/Linux IP address</string>
+    <string name="settings_title">Settings</string>
+    <string name="resolution_scale">Resolution scale</string>
+    <string name="max_fps">Max FPS</string>
+    <string name="usb_instructions">1. Enable USB debugging\n2. Plug into your Mac\n3. Run: adb forward tcp:7878 tcp:7878</string>
+</resources>

@@ -55,3 +55,6 @@ out/
 # Test output
 test-results/
 build/reports/
+
+# Generated keep markers
+!**/.gitkeep

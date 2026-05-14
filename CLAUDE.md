@@ -122,7 +122,7 @@ android-monitor/
 
 ```
 Offset  Size  Field
-0       2     MAGIC: 0xAM 0x01
+0       2     MAGIC: 0xAD 0x01
 2       1     TYPE (see packet types below)
 3       1     FLAGS (bitfield, see below)
 4       4     LENGTH: payload size in bytes, uint32 big-endian (max 4 MB enforced by receiver)
@@ -141,7 +141,7 @@ Offset  Size  Field
 | `0x03` | HANDSHAKE_ERR   | Host → Android  | JSON: `{"code":<int>,"message":"<str>"}` |
 | `0x10` | VIDEO_FRAME     | Host → Android  | `[DISPLAY_ID: 1B][AVCC NAL data]` |
 | `0x11` | AUDIO_FRAME     | Host → Android  | `[CHANNEL_COUNT: 1B][SAMPLE_RATE_DIV100: 1B][AAC ADTS data]` |
-| `0x20` | TOUCH_EVENT     | Android → Host  | 12 bytes fixed: `[ACTION:1B][PTR_ID:1B][X_NORM:f32BE][Y_NORM:f32BE][PRESSURE:f32BE]` |
+| `0x20` | TOUCH_EVENT     | Android → Host  | 14 bytes fixed: `[ACTION:1B][PTR_ID:1B][X_NORM:f32BE][Y_NORM:f32BE][PRESSURE:f32BE]` |
 | `0x21` | KEY_EVENT       | Android → Host  | 8 bytes fixed: `[ACTION:1B][MODIFIERS:1B][ANDROID_KEYCODE:2B BE][UNICODE_CHAR:4B BE UTF-32]` |
 | `0x30` | DISPLAY_LIST    | Host → Android  | JSON array of display descriptors |
 | `0x31` | SELECT_DISPLAY  | Android → Host  | JSON: `{"display_id":<int>}` |
@@ -251,9 +251,11 @@ codec.setCallback(callback, handler)
 
 `releaseOutputBuffer(index, true)` renders directly to the `Surface` — no CPU readback.
 
-### Android Audio: Oboe (not AudioTrack)
+### Android Audio: AudioTrack with `PERFORMANCE_MODE_LOW_LATENCY` (Oboe upgrade planned)
 
-Oboe selects AAudio's `AAUDIO_PERFORMANCE_MODE_LOW_LATENCY` automatically (~5–10ms vs ~50ms for AudioTrack streaming mode). AAC decoded by a second MediaCodec instance; PCM fed into Oboe's write callback via a pre-allocated ring buffer (3 × 1024-frame capacity).
+Initial scaffold uses `AudioTrack.Builder().setPerformanceMode(PERFORMANCE_MODE_LOW_LATENCY)` which on API 26+ routes through AAudio under the hood (~10–20ms latency). AAC is decoded by a second `MediaCodec` instance; PCM is fed into the AudioTrack with `WRITE_NON_BLOCKING`.
+
+A future migration to Oboe (NDK/JNI) is planned for sub-10ms latency. Until then, do not introduce extra audio buffering — keep the MediaCodec → AudioTrack hand-off direct.
 
 ### Networking: Network.framework on host, raw NIO sockets on Android
 
