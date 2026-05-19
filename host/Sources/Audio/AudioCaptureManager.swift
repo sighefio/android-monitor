@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Core
 
 public struct AudioFormatDescriptor: Sendable {
     public let sampleRate: UInt32

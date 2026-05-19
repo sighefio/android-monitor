@@ -6,7 +6,7 @@ import java.nio.ByteOrder
 object Protocol {
     const val MAGIC_0: Byte = 0xAD.toByte()
     const val MAGIC_1: Byte = 0x01.toByte()
-    const val HEADER_SIZE: Int = 22
+    const val HEADER_SIZE: Int = 24
     const val MAX_PAYLOAD_SIZE: Int = 4 * 1024 * 1024
     const val VERSION: Int = 1
     const val DEFAULT_PORT: Int = 7878

@@ -1,4 +1,5 @@
 import Foundation
+import Core
 
 public enum InputDecoder {
     public static func decodeTouch(_ payload: Data) throws -> TouchPacket {

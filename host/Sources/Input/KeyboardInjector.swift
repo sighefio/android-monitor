@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import Core
 
 public final class KeyboardInjector: @unchecked Sendable {
     private let log = Log(category: "input.keyboard")

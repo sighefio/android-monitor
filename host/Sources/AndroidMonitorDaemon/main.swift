@@ -1,4 +1,5 @@
 import Foundation
+import Core
 
 @available(macOS 13.0, *)
 func runDaemon() async {
@@ -45,15 +46,22 @@ func runDaemon() async {
         exit(1)
     }
 
-    let signalSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
-    signalSource.setEventHandler {
-        Task {
-            await coordinator.stop()
-            exit(0)
+    let signalQueue = DispatchQueue(label: "com.androidmonitor.signals")
+    let signalsToCatch: [Int32] = [SIGINT, SIGTERM]
+    var signalSources: [DispatchSourceSignal] = []
+    for sig in signalsToCatch {
+        let src = DispatchSource.makeSignalSource(signal: sig, queue: signalQueue)
+        src.setEventHandler {
+            Task {
+                await coordinator.stop()
+                exit(0)
+            }
         }
+        signal(sig, SIG_IGN)
+        src.resume()
+        signalSources.append(src)
     }
-    signal(SIGINT, SIG_IGN)
-    signalSource.resume()
+    _ = signalSources // keep sources alive for the lifetime of the process
 
     try? await Task.sleep(nanoseconds: UInt64.max)
 }

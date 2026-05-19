@@ -1,6 +1,7 @@
 import Foundation
 @preconcurrency import ScreenCaptureKit
 import CoreGraphics
+import Core
 
 @available(macOS 13.0, *)
 public actor ScreenCaptureManager {

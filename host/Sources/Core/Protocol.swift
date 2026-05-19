@@ -3,7 +3,7 @@ import Foundation
 public enum Protocol {
     public static let magic0: UInt8 = 0xAD
     public static let magic1: UInt8 = 0x01
-    public static let headerSize: Int = 22
+    public static let headerSize: Int = 24
     public static let maxPayloadSize: Int = 4 * 1024 * 1024
     public static let version: UInt32 = 1
 }
@@ -133,6 +133,11 @@ public struct HandshakeAck: Codable, Sendable {
 public struct HandshakeError: Codable, Sendable {
     public let code: Int
     public let message: String
+
+    public init(code: Int, message: String) {
+        self.code = code
+        self.message = message
+    }
 }
 
 public struct DisplayDescriptor: Codable, Sendable {
@@ -149,11 +154,23 @@ public struct DisplayDescriptor: Codable, Sendable {
         case height
         case isPrimary = "is_primary"
     }
+
+    public init(displayId: UInt32, name: String, width: UInt32, height: UInt32, isPrimary: Bool) {
+        self.displayId = displayId
+        self.name = name
+        self.width = width
+        self.height = height
+        self.isPrimary = isPrimary
+    }
 }
 
 public struct SelectDisplayMessage: Codable, Sendable {
     public let displayId: UInt32
     enum CodingKeys: String, CodingKey { case displayId = "display_id" }
+
+    public init(displayId: UInt32) {
+        self.displayId = displayId
+    }
 }
 
 public enum ProtocolError: Error, Sendable {

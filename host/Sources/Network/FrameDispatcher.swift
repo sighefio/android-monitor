@@ -1,4 +1,6 @@
 import Foundation
+import Encode
+import Audio
 
 public actor FrameDispatcher {
     private var sessions: [UUID: ClientSession] = [:]

@@ -23,7 +23,16 @@ public enum KeycodeMap {
         case 122: return 0x73   // MOVE_HOME
         case 123: return 0x77   // MOVE_END
         case 131...142: return CGKeyCode(0x7A + UInt16(keycode - 131))   // F1..F12
-        case 7...16:    return CGKeyCode(0x1D + UInt16(keycode - 7))     // 0..9 top row (approximate)
+        case 7:  return 0x1D    // 0
+        case 8:  return 0x12    // 1
+        case 9:  return 0x13    // 2
+        case 10: return 0x14    // 3
+        case 11: return 0x15    // 4
+        case 12: return 0x17    // 5
+        case 13: return 0x16    // 6
+        case 14: return 0x1A    // 7
+        case 15: return 0x1C    // 8
+        case 16: return 0x19    // 9
         case 29...54:   return CGKeyCode(asciiToMac(keycode: keycode))
         default: return nil
         }

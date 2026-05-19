@@ -1,6 +1,7 @@
 import Foundation
 import AudioToolbox
 import CoreMedia
+import Core
 
 public struct EncodedAudioSample: Sendable {
     public let data: Data

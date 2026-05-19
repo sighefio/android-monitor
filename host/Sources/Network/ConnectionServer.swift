@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import Core
 
 public protocol ConnectionServerDelegate: ClientSessionDelegate {
     func server(_ server: ConnectionServer, didAcceptSession session: ClientSession) async

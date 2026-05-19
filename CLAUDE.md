@@ -6,6 +6,14 @@ Use an Android phone or tablet as an external monitor for macOS (Linux support p
 
 Lowest possible glass-to-glass latency. Every API and architecture choice is made to serve that goal. Do not introduce abstractions or dependencies that add latency.
 
+## Scope — v1 is mirror-only
+
+**v1 mirrors an existing macOS display; it does not create a new one.** The Android device will **not** appear in **System Settings → Displays** and cannot be used as an extended desktop. You pick one of the real `SCDisplay`s the host enumerates (built-in, or an attached monitor), and that display's pixels stream to Android. Touch and keyboard events are injected back into the same display.
+
+Why: `ScreenCaptureKit` is a one-way *read* API. macOS has no public API for third parties to publish a virtual display. Apps that *do* show up in Display Settings (Sidecar, Duet, Luna, Astropad) either use Apple-private frameworks or a signed DriverKit system extension, both of which are out of scope for v1.
+
+A future "virtual display" milestone is tracked separately (see `docs/ARCHITECTURE.md` → Roadmap). It would add a `Sources/VirtualDisplay/` module that publishes a `CGDirectDisplayID` — likely via a DriverKit `.dext` — and point `CaptureSession` at that ID instead of a physical one. The encoder, network, decoder, and input layers stay unchanged. **Do not start that work without explicit direction**; it requires Apple entitlements and a system extension review path that v1 does not need.
+
 ---
 
 ## Architecture Overview
@@ -15,7 +23,7 @@ Lowest possible glass-to-glass latency. Every API and architecture choice is mad
 │  macOS Host Daemon (Swift)                  │ ←───────────────── Android App (Kotlin)
 │                                             │                      │
 │  ScreenCaptureKit → VideoToolbox (H.264)    │ ──VIDEO_FRAME──────► │  MediaCodec → SurfaceView
-│  SCK system audio → AudioConverter (AAC)   │ ──AUDIO_FRAME──────► │  Oboe (AAudio)
+│  SCK system audio → AudioConverter (AAC)   │ ──AUDIO_FRAME──────► │  MediaCodec → AudioTrack (low-latency)
 │  CGEvent injection ←────────────────────── │ ◄─TOUCH_EVENT────── │  MotionEvent capture
 │  CGEvent injection ←────────────────────── │ ◄─KEY_EVENT──────── │  InputConnection
 └─────────────────────────────────────────────┘                      │
@@ -34,10 +42,9 @@ android-monitor/
 ├── host/                              # macOS host daemon
 │   ├── Package.swift                  # Swift Package Manager manifest
 │   └── Sources/
-│       ├── AndroidMonitorDaemon/      # Executable target
-│       │   ├── main.swift             # Entry point, argument parsing, lifecycle
-│       │   ├── AppDelegate.swift      # NSApplication delegate (menu-bar app, LSUIElement=YES)
-│       │   └── StatusBarController.swift
+│       ├── AndroidMonitorDaemon/      # Executable target (CLI daemon — not a menu-bar app)
+│       │   ├── main.swift             # Entry point, argument parsing, SIGINT handler
+│       │   └── StreamCoordinator.swift # Wires capture → encode → dispatcher → server; owns per-connection encoder lifecycle
 │       ├── Core/                      # Shared library target
 │       │   ├── Protocol.swift         # ALL wire format constants (magic, types, flags) — single source of truth
 │       │   ├── Config.swift           # ServerConfig, ConnectionMode enum, port constant (7878)
@@ -114,11 +121,28 @@ android-monitor/
     └── LINUX_NOTES.md                 # Future Linux port notes (PipeWire/X11/Wayland)
 ```
 
+### SPM Target Graph (host)
+
+The host is split into 7 library targets plus one executable. Dependencies flow strictly upward — keep them that way when adding code.
+
+```
+Core ── (no deps)
+ ├── Capture   (excludes LinuxCapture/ on macOS builds)
+ ├── Encode
+ ├── Audio
+ ├── Input
+ ├── USB
+ └── Network   ── depends on Encode, Audio
+AndroidMonitorDaemon ── depends on all of the above
+```
+
+Tests: `ProtocolTests` (→ Core), `EncoderTests` (→ Encode), `InputTests` (→ Input). When adding a new module, mirror this pattern in `host/Package.swift`.
+
 ---
 
 ## Wire Protocol
 
-### Packet Header (22 bytes, always)
+### Packet Header (24 bytes, always)
 
 ```
 Offset  Size  Field
@@ -127,10 +151,10 @@ Offset  Size  Field
 3       1     FLAGS (bitfield, see below)
 4       4     LENGTH: payload size in bytes, uint32 big-endian (max 4 MB enforced by receiver)
 8       8     SEQ: monotonically increasing uint64, big-endian, per-connection
-16      6     TIMESTAMP_US: host mach_absolute_time in microseconds, uint64 big-endian
+16      8     TIMESTAMP_US: host mach_absolute_time in microseconds, uint64 big-endian
 ```
 
-> Total header = 22 bytes. SEQ is per-connection (not per type). Gaps in SEQ indicate a connection reset, not packet loss (TCP guarantees delivery).
+> Total header = 24 bytes. SEQ is per-connection (not per type). Gaps in SEQ indicate a connection reset, not packet loss (TCP guarantees delivery).
 
 ### Packet Types
 
@@ -305,7 +329,8 @@ cd host && swift build
 cd host && swift build -c release
 
 # Run (requires Screen Recording permission in System Settings)
-.build/debug/AndroidMonitorDaemon --port 7878 --display 1
+# Flags: --port <port> (default 7878), --bitrate <kbps>, --mode <wifi|usb|both>
+.build/debug/AndroidMonitorDaemon --port 7878 --bitrate 8000 --mode both
 
 # Run tests
 swift test

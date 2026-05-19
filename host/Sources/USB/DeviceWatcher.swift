@@ -1,6 +1,7 @@
 import Foundation
 import IOKit
 import IOKit.usb
+import Core
 
 public actor DeviceWatcher {
     private let log = Log(category: "usb.watcher")

@@ -1,4 +1,5 @@
 import Foundation
+import Core
 
 public actor ADBForwardManager {
     private let log = Log(category: "usb.adb")
@@ -31,7 +32,10 @@ public actor ADBForwardManager {
             return false
         }
         let ok = await run(adb, ["forward", "tcp:\(port)", "tcp:\(port)"])
-        if ok { log.info("adb forward tcp:\(port) tcp:\(port) installed") }
+        if ok {
+            let p = port
+            log.info("adb forward tcp:\(p) tcp:\(p) installed")
+        }
         return ok
     }
 

@@ -2,6 +2,7 @@ import Foundation
 import CoreMedia
 import CoreVideo
 @preconcurrency import ScreenCaptureKit
+import Core
 
 public struct CaptureFrame: Sendable {
     public let sampleBuffer: CMSampleBuffer

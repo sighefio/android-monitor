@@ -8,19 +8,20 @@ let package = Package(
     ],
     products: [
         .executable(name: "AndroidMonitorDaemon", targets: ["AndroidMonitorDaemon"]),
-        .library(name: "AndroidMonitorCore", targets: ["Core", "Capture", "Encode", "Audio", "Network", "Input", "USB"])
+        .library(name: "AndroidMonitorCore", targets: ["Core", "Capture", "Encode", "Audio", "Networking", "Input", "USB"])
     ],
     targets: [
         .target(name: "Core", path: "Sources/Core"),
         .target(name: "Capture", dependencies: ["Core"], path: "Sources/Capture", exclude: ["LinuxCapture"]),
         .target(name: "Encode", dependencies: ["Core"], path: "Sources/Encode"),
         .target(name: "Audio", dependencies: ["Core"], path: "Sources/Audio"),
-        .target(name: "Network", dependencies: ["Core", "Encode", "Audio"], path: "Sources/Network"),
+        .target(name: "Networking", dependencies: ["Core", "Encode", "Audio"], path: "Sources/Network"),
+
         .target(name: "Input", dependencies: ["Core"], path: "Sources/Input"),
         .target(name: "USB", dependencies: ["Core"], path: "Sources/USB"),
         .executableTarget(
             name: "AndroidMonitorDaemon",
-            dependencies: ["Core", "Capture", "Encode", "Audio", "Network", "Input", "USB"],
+            dependencies: ["Core", "Capture", "Encode", "Audio", "Networking", "Input", "USB"],
             path: "Sources/AndroidMonitorDaemon"
         ),
         .testTarget(name: "ProtocolTests", dependencies: ["Core"], path: "Tests/ProtocolTests"),

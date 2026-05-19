@@ -1,6 +1,13 @@
 import Foundation
 @preconcurrency import ScreenCaptureKit
 import CoreGraphics
+import Core
+import Capture
+import Encode
+import Audio
+import Networking
+import Input
+import USB
 
 @available(macOS 13.0, *)
 public final class StreamCoordinator: ClientSessionDelegate, ConnectionServerDelegate, CaptureSink, @unchecked Sendable {

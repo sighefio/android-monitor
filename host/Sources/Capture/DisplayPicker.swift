@@ -1,5 +1,6 @@
 import Foundation
 @preconcurrency import ScreenCaptureKit
+import Core
 
 @available(macOS 13.0, *)
 public actor DisplayPicker {

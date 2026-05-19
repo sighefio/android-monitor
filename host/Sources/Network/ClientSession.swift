@@ -1,5 +1,8 @@
 import Foundation
 import Network
+import Core
+import Encode
+import Audio
 
 public protocol ClientSessionDelegate: AnyObject, Sendable {
     func session(_ session: ClientSession, didReceiveHandshake request: HandshakeRequest) async

@@ -2,6 +2,7 @@ import Foundation
 import CoreMedia
 import CoreVideo
 import VideoToolbox
+import Core
 
 public struct EncodedVideoSample: Sendable {
     public let data: Data

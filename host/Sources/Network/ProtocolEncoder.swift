@@ -1,4 +1,5 @@
 import Foundation
+import Core
 
 public enum ProtocolEncoder {
     public static func encode(type: PacketType, flags: PacketFlags, sequence: UInt64, payload: Data) -> Data {

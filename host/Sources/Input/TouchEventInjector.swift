@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import Core
 
 public protocol EventPosterProtocol: Sendable {
     func post(_ event: CGEvent)

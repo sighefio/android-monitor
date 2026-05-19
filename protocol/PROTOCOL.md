@@ -2,7 +2,7 @@
 
 Version 1. Custom binary protocol over TCP. Used identically over WiFi and ADB-forwarded USB (port 7878).
 
-## Header (22 bytes, big-endian)
+## Header (24 bytes, big-endian)
 
 ```
 0       1       2       3       4       5       6       7       8

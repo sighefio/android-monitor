@@ -8,20 +8,20 @@ public struct Log: Sendable {
         self.logger = Logger(subsystem: subsystem, category: category)
     }
 
-    public func debug(_ message: @autoclosure () -> String) {
-        logger.debug("\(message(), privacy: .public)")
+    public func debug(_ message: String) {
+        logger.debug("\(message, privacy: .public)")
     }
 
-    public func info(_ message: @autoclosure () -> String) {
-        logger.info("\(message(), privacy: .public)")
+    public func info(_ message: String) {
+        logger.info("\(message, privacy: .public)")
     }
 
-    public func warn(_ message: @autoclosure () -> String) {
-        logger.warning("\(message(), privacy: .public)")
+    public func warn(_ message: String) {
+        logger.warning("\(message, privacy: .public)")
     }
 
-    public func error(_ message: @autoclosure () -> String) {
-        logger.error("\(message(), privacy: .public)")
+    public func error(_ message: String) {
+        logger.error("\(message, privacy: .public)")
     }
 }
 
